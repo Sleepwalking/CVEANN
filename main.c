@@ -1,27 +1,20 @@
 #include <stdio.h>
 #include "Network/Perceptron.h"
-#include "Network/FeedForward3L.h"
-#include "Network/FeedForward3L_Fast.h"
-#include "Network/FeedForwardNL.h"
-#include "Network/FeedForwardNL_Fast.h"
+#include "Network/FeedForward.h"
+#include "Network/FeedForward_Fast.h"
+#include "Network/FeedForwardMomentum.h"
 #include "Trainer/Trainer_Perceptron.h"
-#include "Trainer/Trainer_FeedForward3L.h"
-#include "Trainer/Trainer_FeedForward3L_Fast.h"
-#include "Trainer/Trainer_FeedForwardNL.h"
-#include "Trainer/Trainer_FeedForwardNL_Fast.h"
+#include "Trainer/Trainer_FeedForward.h"
+#include "Trainer/Trainer_FeedForward_Fast.h"
 #include "Test/Formant.h"
 #include "Activator.h"
-/*
-#define TriBP(symbol)\
-    E += Trainer_FeedForward3L_Fast_BP(& ftest, Spectrum_##symbol##_E2, r##symbol, n);\
-    E += Trainer_FeedForward3L_Fast_BP(& ftest, Spectrum_##symbol##_C3, r##symbol, n);\
-    E += Trainer_FeedForward3L_Fast_BP(& ftest, Spectrum_##symbol##_G4, r##symbol, n)
 
-*/
 #define TriBP(symbol)\
-    E += Trainer_FeedForwardNL_Fast_BP(& fnet, Spectrum_##symbol##_E2, r##symbol, n);\
-    E += Trainer_FeedForwardNL_Fast_BP(& fnet, Spectrum_##symbol##_C3, r##symbol, n);\
-    E += Trainer_FeedForwardNL_Fast_BP(& fnet, Spectrum_##symbol##_G4, r##symbol, n)
+    E = 0;\
+    E += Trainer_FeedForward_Fast_BP(& fnet, Spectrum_##symbol##_E2, r##symbol, n);\
+    E += Trainer_FeedForward_Fast_BP(& fnet, Spectrum_##symbol##_C3, r##symbol, n);\
+    E += Trainer_FeedForward_Fast_BP(& fnet, Spectrum_##symbol##_G4, r##symbol, n);\
+    Max = E > Max ? E : Max
 
 int main(void)
 {
@@ -29,15 +22,24 @@ int main(void)
 
     int Layers[] = {105, 150, 6};
 
-    FeedForwardNL_Fast fnet;
-    FeedForwardNL_Fast_Ctor(& fnet);
-    FeedForwardNL_Fast_SetLayer(& fnet, Layers, 3);
-    FeedForwardNL_Fast_RandomInit(& fnet, 0.5);
+    FeedForward_Fast fnet;
+    FeedForward_Fast_Ctor(& fnet);
+    FeedForward_Fast_SetLayer(& fnet, Layers, 3);
+    FeedForward_Fast_RandomInit(& fnet, 0.5);
+
+    FeedForwardMomentum fm;
+    FeedForwardMomentum_Ctor(& fm);
+    FeedForwardMomentum_Construct_Fast(& fm, & fnet);
+    FeedForwardMomentum_Clear(& fm);
+
+    Trainer_SetBPMomentum(& fm);
+    Trainer_SetBPMomentumFactor(0.2);
 
     float E;
     for(i = 0; i < 1000; i ++)
     {
         float n = (1.0f - (float)i / 1000) * 1;
+        float Max = 0;
         E = 0;
         TriBP(a);
         TriBP(i);
@@ -45,17 +47,16 @@ int main(void)
         TriBP(e);
         TriBP(e_);
         TriBP(u);
-        E += Trainer_FeedForwardNL_Fast_BP(& fnet, Spectrum_u_G3, ru, n);
-        printf("%f\n", E / 2);
+        E += Trainer_FeedForward_Fast_BP(& fnet, Spectrum_u_G3, ru, n);
+        Max = E > Max ? E : Max;
+        printf("%f\n", Max / 2);
+        if(Max / 2 < 0.1)
+            break;
     }
-    printf("%f\n", E / 2);
+    printf("i = %d\n", i);
 
-    for(i = 0; i < 105; i ++)
-    {
-        fnet.Layers[0].O[i] = Spectrum_pu_D3[i];
-    }
-
-    FeedForwardNL_Fast_UpdateState(& fnet);
+    FeedForward_Fast_SetInput(& fnet, Spectrum_pu_D3);
+    FeedForward_Fast_UpdateState(& fnet);
 
     printf("%f, %f, %f, %f, %f, %f\n",
            fnet.Layers[fnet.Layers_Index].O[0],
@@ -65,46 +66,9 @@ int main(void)
            fnet.Layers[fnet.Layers_Index].O[4],
            fnet.Layers[fnet.Layers_Index].O[5]);
 
-    FeedForwardNL_Fast_Dtor(& fnet);
-/*
+    FeedForwardMomentum_Dtor(& fm);
+    FeedForward_Fast_Dtor(& fnet);
 
-    FeedForward3L_Fast ftest;
-    FeedForward3L_Fast_Ctor(& ftest);
-    FeedForward3L_Fast_SetLayer(& ftest, 105, 150, 6);
-    FeedForward3L_Fast_RandomInit(& ftest, 0.4);
-
-    float E;
-    for(i = 0; i < 1000; i ++)
-    {
-        float n = (1.0f - (float)i / 1000) * 1;
-        E = 0;
-        TriBP(a);
-        TriBP(i);
-        TriBP(o);
-        TriBP(e);
-        TriBP(e_);
-        TriBP(u);
-        E += Trainer_FeedForward3L_Fast_BP(& ftest, Spectrum_u_G3, ru, n);
-        printf("%f\n", E / 2);
-    }
-    printf("%f\n", E / 2);
-
-    for(i = 0; i < 105; i ++)
-    {
-        ftest.X[i] = Spectrum_pu_E3[i];
-    }
-    FeedForward3L_Fast_UpdateState(& ftest);
-
-    printf("%f, %f, %f, %f, %f, %f\n",
-           ftest.O[0],
-           ftest.O[1],
-           ftest.O[2],
-           ftest.O[3],
-           ftest.O[4],
-           ftest.O[5]);
-
-    FeedForward3L_Fast_Dtor(& ftest);
-    */
     printf("Hello World!\n");
     return 0;
 }

@@ -1,14 +1,14 @@
-#include "Trainer_FeedForwardNL.h"
+#include "Trainer_FeedForward.h"
+#include "CVEDSP/IntrinUtil/FloatArray.h"
 #include <malloc.h>
 #include <string.h>
 #include <math.h>
 
-float Trainer_FeedForwardNL_BP(FeedForwardNL* Dest, float* Input, float* ExpectedOutput, float Eit)
+float Trainer_FeedForward_BP(FeedForward* Dest, float* Input, float* ExpectedOutput, float Eit)
 {
     int i, j, k, MaxSize;
-    for(i = 0; i <= Dest -> Layers[0].NList_Index; i ++)
-        Dest -> Layers[0].NList[i].InputVal = Input[i];
-    FeedForwardNL_UpdateState(Dest);
+    FeedForward_SetInput(Dest, Input);
+    FeedForward_UpdateState(Dest);
 
     MaxSize = - 999;
     for(i = 0; i < Dest -> Layers_Index; i ++)
@@ -45,8 +45,29 @@ float Trainer_FeedForwardNL_BP(FeedForwardNL* Dest, float* Input, float* Expecte
             }
         }
         for(j = 0; j <= Dest -> Layers[i].NList_Index; j ++)
-            for(k = 0; k <= Dest -> Layers[i - 1].NList_Index; k ++)
-                Dest -> Layers[i].NList[j].Weight[k] += DeltaW[j] * Dest -> Layers[i - 1].NList[k].Output;
+        {
+            /*
+            if(__MomentumFactor != 0)
+            {
+                Boost_FloatMul(__Momentum -> Layers[i].dW[j], __Momentum -> Layers[i].dW[j], __MomentumFactor,  __Momentum -> Layers[i].dWSize + 1);
+                Boost_FloatAddArr(DeltaW, DeltaW, __Momentum -> Layers[i].dW[j], __Momentum -> Layers[i].dWSize + 1);
+                Boost_FloatCopy(__Momentum -> Layers[i].dW[i],  DeltaW, __Momentum -> Layers[i].dWSize + 1);
+            }*/
+            if(__MomentumFactor == 0)
+            {
+                for(k = 0; k <= Dest -> Layers[i - 1].NList_Index; k ++)
+                    Dest -> Layers[i].NList[j].Weight[k] += DeltaW[j] * Dest -> Layers[i - 1].NList[k].Output;
+            }else
+            {
+                Boost_FloatMul(__Momentum -> Layers[i].dW[j], __Momentum -> Layers[i].dW[j], __MomentumFactor,  __Momentum -> Layers[i].dWSize + 1);
+                for(k = 0; k <= Dest -> Layers[i - 1].NList_Index; k ++)
+                {
+                    float wTmp = DeltaW[j] * Dest -> Layers[i - 1].NList[k].Output + __Momentum -> Layers[i].dW[j][k];
+                    __Momentum -> Layers[i].dW[j][k] = wTmp;
+                    Dest -> Layers[i].NList[j].Weight[k] += wTmp;
+                }
+            }
+        }
         float* tmp = DeltaF;
         DeltaF = DeltaF2;
         DeltaF2 = tmp;

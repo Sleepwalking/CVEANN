@@ -1,15 +1,14 @@
-#include "Trainer_FeedForwardNL_Fast.h"
+#include "Trainer_FeedForward_Fast.h"
 #include "CVEDSP/IntrinUtil/FloatArray.h"
 #include <malloc.h>
 #include <string.h>
 #include <math.h>
 
-float Trainer_FeedForwardNL_Fast_BP(FeedForwardNL_Fast* Dest, float* Input, float* ExpectedOutput, float Eit)
+float Trainer_FeedForward_Fast_BP(FeedForward_Fast* Dest, float* Input, float* ExpectedOutput, float Eit)
 {
     int i, j, MaxSize;
-    for(i = 0; i <= Dest -> Layers[0].O_Index; i ++)
-        Dest -> Layers[0].O[i] = Input[i];
-    FeedForwardNL_Fast_UpdateState(Dest);
+    FeedForward_Fast_SetInput(Dest, Input);
+    FeedForward_Fast_UpdateState(Dest);
 
     MaxSize = - 999;
     for(i = 0; i < Dest -> Layers_Index; i ++)
@@ -73,6 +72,12 @@ float Trainer_FeedForwardNL_Fast_BP(FeedForwardNL_Fast* Dest, float* Input, floa
         for(j = 0; j <= Dest -> Layers[i].O_Index; j ++)
         {
             Boost_FloatMul(Tmp, Dest -> Layers[i - 1].O, DeltaW[j], Dest -> Layers[i - 1].O_Index + 1);
+            if(__MomentumFactor != 0)
+            {
+                Boost_FloatMul(__Momentum -> Layers[i].dW[j], __Momentum -> Layers[i].dW[j], __MomentumFactor,  __Momentum -> Layers[i].dWSize + 1);
+                Boost_FloatAddArr(Tmp, Tmp, __Momentum -> Layers[i].dW[j], __Momentum -> Layers[i].dWSize + 1);
+                Boost_FloatCopy(__Momentum -> Layers[i].dW[j], Tmp, __Momentum -> Layers[i].dWSize + 1);
+            }
             Boost_FloatAddArr(Dest -> Layers[i].W[j], Dest -> Layers[i].W[j], Tmp, Dest -> Layers[i - 1].O_Index + 1);
         }
         float* tmp = DeltaF;

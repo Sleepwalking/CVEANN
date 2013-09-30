@@ -1,4 +1,4 @@
-#include "FeedForwardNL.h"
+#include "FeedForward.h"
 #include "Rand.h"
 
 _Constructor_ (NeuronLayer)
@@ -12,18 +12,18 @@ _Destructor_ (NeuronLayer)
     ArrayType_Dtor(Neuron, Dest -> NList);
 }
 
-_Constructor_ (FeedForwardNL)
+_Constructor_ (FeedForward)
 {
     ArrayType_Init(NeuronLayer, Dest -> Layers);
 }
 
-_Destructor_ (FeedForwardNL)
+_Destructor_ (FeedForward)
 {
     ArrayType_ObjDtor(NeuronLayer, Dest -> Layers);
     ArrayType_Dtor(NeuronLayer, Dest -> Layers);
 }
 
-void FeedForwardNL_SetLayer(FeedForwardNL* Dest, int* LayerSize, int LayerNum)
+void FeedForward_SetLayer(FeedForward* Dest, int* LayerSize, int LayerNum)
 {
     int i, j, k;
     ArrayType_ObjDtor(NeuronLayer, Dest -> Layers);
@@ -51,7 +51,7 @@ void FeedForwardNL_SetLayer(FeedForwardNL* Dest, int* LayerSize, int LayerNum)
     }
 }
 
-void FeedForwardNL_UpdateState(FeedForwardNL* Dest)
+void FeedForward_UpdateState(FeedForward* Dest)
 {
     int i, j;
     for(i = 0; i <= Dest -> Layers_Index; i ++)
@@ -59,11 +59,18 @@ void FeedForwardNL_UpdateState(FeedForwardNL* Dest)
             Neuron_UpdateState(Dest -> Layers[i].NList + j);
 }
 
-void FeedForwardNL_RandomInit(FeedForwardNL* Dest, float Range)
+void FeedForward_RandomInit(FeedForward* Dest, float Range)
 {
     int i, j, k;
     for(i = 1; i <= Dest -> Layers_Index; i ++)
         for(j = 0; j <= Dest -> Layers[i].NList_Index; j ++)
             for(k = 0; k <= Dest -> Layers[i - 1].NList_Index; k ++)
                 Dest -> Layers[i].NList[j].Weight[k] = Random() * Range - Range * 0.5;
+}
+
+void FeedForward_SetInput(FeedForward* Dest, float* Input)
+{
+    int i;
+    for(i = 0; i <= Dest -> Layers[0].NList_Index; i ++)
+        Dest -> Layers[0].NList[i].InputVal = Input[i];
 }

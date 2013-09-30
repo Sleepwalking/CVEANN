@@ -1,4 +1,4 @@
-#include "FeedForwardNL_Fast.h"
+#include "FeedForward_Fast.h"
 #include "Rand.h"
 #include "Activator.h"
 #include "CVEDSP/IntrinUtil/FloatArray.h"
@@ -19,18 +19,18 @@ _Destructor_ (NeuronLayer_Fast)
     ArrayType_Dtor(float, Dest -> O);
 }
 
-_Constructor_ (FeedForwardNL_Fast)
+_Constructor_ (FeedForward_Fast)
 {
     ArrayType_Init(NeuronLayer_Fast, Dest -> Layers);
 }
 
-_Destructor_ (FeedForwardNL_Fast)
+_Destructor_ (FeedForward_Fast)
 {
     ArrayType_ObjDtor(NeuronLayer_Fast, Dest -> Layers);
     ArrayType_Dtor(NeuronLayer_Fast, Dest -> Layers);
 }
 
-void FeedForwardNL_Fast_SetLayer(FeedForwardNL_Fast* Dest, int* LayerSize, int LayerNum)
+void FeedForward_Fast_SetLayer(FeedForward_Fast* Dest, int* LayerSize, int LayerNum)
 {
     int i, j;
     ArrayType_ObjDtor(NeuronLayer_Fast, Dest -> Layers);
@@ -54,7 +54,7 @@ void FeedForwardNL_Fast_SetLayer(FeedForwardNL_Fast* Dest, int* LayerSize, int L
     }
 }
 
-void FeedForwardNL_Fast_UpdateState(FeedForwardNL_Fast* Dest)
+void FeedForward_Fast_UpdateState(FeedForward_Fast* Dest)
 {
     int i, j;
     int TmpSize = - 999;
@@ -74,7 +74,7 @@ void FeedForwardNL_Fast_UpdateState(FeedForwardNL_Fast* Dest)
     free(Tmp);
 }
 
-void FeedForwardNL_Fast_RandomInit(FeedForwardNL_Fast* Dest, float Range)
+void FeedForward_Fast_RandomInit(FeedForward_Fast* Dest, float Range)
 {
     int i, j, k;
     for(i = 1; i <= Dest -> Layers_Index; i ++)
@@ -83,7 +83,12 @@ void FeedForwardNL_Fast_RandomInit(FeedForwardNL_Fast* Dest, float Range)
                 Dest -> Layers[i].W[j][k] = Random() * Range - Range * 0.5;
 }
 
-int FeedForwardNL_Fast_FromFeedForwardNL(FeedForwardNL_Fast* Dest, FeedForwardNL* Src)
+void FeedForward_Fast_SetInput(FeedForward_Fast* Dest, float* Input)
+{
+    Boost_FloatCopy(Dest -> Layers[0].O, Input, Dest -> Layers[0].O_Index + 1);
+}
+
+int FeedForward_Fast_FromFeedForward(FeedForward_Fast* Dest, FeedForward* Src)
 {
     int i, j;
     if(Src -> Layers_Index != Dest -> Layers_Index)

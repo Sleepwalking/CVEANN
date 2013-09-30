@@ -16,15 +16,13 @@ SOURCES += main.c \
     Activator.c \
     Neuron/Neuron.c \
     Trainer/Trainer_Perceptron.c \
-    Network/FeedForward3L.c \
     Rand.c \
-    Trainer/Trainer_FeedForward3L.c \
-    Network/FeedForward3L_Fast.c \
-    Trainer/Trainer_FeedForward3L_Fast.c \
-    Network/FeedForwardNL.c \
-    Trainer/Trainer_FeedForwardNL.c \
-    Network/FeedForwardNL_Fast.c \
-    Trainer/Trainer_FeedForwardNL_Fast.c
+    Network/FeedForward.c \
+    Network/FeedForward_Fast.c \
+    Trainer/Trainer_FeedForward_Fast.c \
+    Trainer/Trainer_FeedForward.c \
+    Network/FeedForwardMomentum.c \
+    Trainer/Trainer_BPMomentum.c
 
 HEADERS += \
     RUtil/RUtil.h \
@@ -40,11 +38,9 @@ HEADERS += \
     Neuron/Neuron.h \
     Network/Perceptron.h \
     Trainer/Trainer_Perceptron.h \
-    Network/FeedForward3L.h \
     Rand.h \
     Trainer/Trainer_FeedForward3L.h \
     Test/Formant.h \
-    Network/FeedForward3L_Fast.h \
     CVEDSP/Interpolation.h \
     CVEDSP/FrameProcessor.h \
     CVEDSP/Plot.h \
@@ -78,11 +74,12 @@ HEADERS += \
     CVEDSP/DSPBase/LinearWarping.h \
     CVEDSP/DSPBase/Filter.h \
     CVEDSP/DSPBase/ControlPointFilter.h \
-    Trainer/Trainer_FeedForward3L_Fast.h \
-    Network/FeedForwardNL.h \
-    Trainer/Trainer_FeedForwardNL.h \
-    Network/FeedForwardNL_Fast.h \
-    Trainer/Trainer_FeedForwardNL_Fast.h
+    Trainer/Trainer_FeedForward.h \
+    Trainer/Trainer_FeedForward_Fast.h \
+    Network/FeedForward.h \
+    Network/FeedForward_Fast.h \
+    Network/FeedForwardMomentum.h \
+    Trainer/Trainer_BPMomentum.h
 
 
 unix:!macx: LIBS += -L$$PWD/CVEDSP/ -lCVEDSP

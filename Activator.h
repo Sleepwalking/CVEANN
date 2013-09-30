@@ -13,4 +13,6 @@ extern float Activator_TanSigmoid(float Input);
 
 extern float Activator_DSigmoid(float Input);
 extern float Activator_DTanSigmoid(float Input);
+
+extern void Activator_SetSigmoidStretch(float Ratio);
 #endif

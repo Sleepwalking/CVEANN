@@ -5,6 +5,7 @@
 #define SIG_TABLE_MAXIMUM 50.0f
 #define SIG_TABLE_SIZE 100000.0f
 float* SigmoidTable = 0;
+float SigmoidStretch = 1;
 
 float Activator_SigmoidBase(float Input);
 void Sigmoid_Init()
@@ -52,6 +53,7 @@ float Activator_Sigmoid(float Input)
 {
     float val;
     int index;
+    Input /= SigmoidStretch;
     if(Input < - SIG_TABLE_MAXIMUM / 2 || Input > SIG_TABLE_MAXIMUM / 2)
         return Activator_SigmoidBase(Input);
     val = Input * SIG_TABLE_SIZE / SIG_TABLE_MAXIMUM + SIG_TABLE_SIZE / 2;
@@ -63,6 +65,7 @@ float Activator_Sigmoid(float Input)
 
 float Activator_TanSigmoid(float Input)
 {
+    Input /= SigmoidStretch;
     return 2.0f / (1.0f + pow(E, - Input)) - 1.0f;
 }
 
@@ -74,4 +77,9 @@ float Activator_DSigmoid(float Input)
 float Activator_DTanSigmoid(float Input)
 {
     return Activator_Sigmoid(Input) * (1.0f - Activator_Sigmoid(Input)) * 2.0f;
+}
+
+void Activator_SetSigmoidStretch(float Ratio)
+{
+    SigmoidStretch = Ratio;
 }
