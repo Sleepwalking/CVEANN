@@ -80,7 +80,7 @@ void FeedForward_Fast_RandomInit(FeedForward_Fast* Dest, float Range)
     for(i = 1; i <= Dest -> Layers_Index; i ++)
         for(j = 0; j <= Dest -> Layers[i].W_Index; j ++)
             for(k = 0; k <= Dest -> Layers[i - 1].O_Index; k ++)
-                Dest -> Layers[i].W[j][k] = Random() * Range - Range * 0.5;
+                Dest -> Layers[i].W[j][k] = Random() * Range;
 }
 
 void FeedForward_Fast_SetInput(FeedForward_Fast* Dest, float* Input)

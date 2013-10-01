@@ -65,7 +65,7 @@ void FeedForward_RandomInit(FeedForward* Dest, float Range)
     for(i = 1; i <= Dest -> Layers_Index; i ++)
         for(j = 0; j <= Dest -> Layers[i].NList_Index; j ++)
             for(k = 0; k <= Dest -> Layers[i - 1].NList_Index; k ++)
-                Dest -> Layers[i].NList[j].Weight[k] = Random() * Range - Range * 0.5;
+                Dest -> Layers[i].NList[j].Weight[k] = Random() * Range;
 }
 
 void FeedForward_SetInput(FeedForward* Dest, float* Input)

@@ -58,9 +58,11 @@ float Activator_Sigmoid(float Input)
         return Activator_SigmoidBase(Input);
     val = Input * SIG_TABLE_SIZE / SIG_TABLE_MAXIMUM + SIG_TABLE_SIZE / 2;
     index = (int)val;
-    return
-        SigmoidTable[index] * (1 - val + index) +
-        SigmoidTable[index + 1] * (val - index);
+    float out = SigmoidTable[index] * (1 - val + index) +
+                SigmoidTable[index + 1] * (val - index);
+    //printf("%f\t", out);
+    //if(out > 0.999) out = 0.999; if(out < 0.001) out = 0.001;
+    return out;
 }
 
 float Activator_TanSigmoid(float Input)
