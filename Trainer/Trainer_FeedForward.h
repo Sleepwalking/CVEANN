@@ -1,7 +1,6 @@
-#ifndef TRAINER_FEEDFORWARD_H
-#define TRAINER_FEEDFORWARD_H
+#ifndef TRAINER_FEEDFORWARD_FAST_H
+#define TRAINER_FEEDFORWARD_FAST_H
 
-#include "Network/FeedForward.h"
 #include "Trainer/Trainer_BPMomentum.h"
 #include "RUtil/RUtil.h"
 

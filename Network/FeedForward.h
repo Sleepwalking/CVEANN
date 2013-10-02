@@ -1,21 +1,20 @@
-#ifndef FEEDFORWARD_H
-#define FEEDFORWARD_H
+#ifndef FEEDFORWARD_FAST_H
+#define FEEDFORWARD_FAST_H
+//Faster but less flexible version of FeedForward.
 
-#include "Neuron/Neuron.h"
+#include "FeedForward.h"
 #include "RUtil/RUtil.h"
 
 AutoClass
 {
-    ArrayType_Define(Neuron, NList);
+    ArrayType_Define(float*, W);
+    ArrayType_Define(float, O);
 } EndClass(NeuronLayer);
 
 AutoClass
 {
     ArrayType_Define(NeuronLayer, Layers);
 } EndClass(FeedForward);
-
-#define FeedForward_LayerSize(Dest, Index)\
-    ((Dest).Layers[Index].NList_Index)
 
 extern void FeedForward_SetLayer(FeedForward* Dest, int* LayerSize, int LayerNum);
 extern void FeedForward_UpdateState(FeedForward* Dest);

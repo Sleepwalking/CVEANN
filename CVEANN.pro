@@ -14,15 +14,16 @@ SOURCES += main.c \
     RUtil/Misc/Converter.c \
     RUtil/Structure/String.c \
     Activator.c \
-    Neuron/Neuron.c \
-    Trainer/Trainer_Perceptron.c \
     Rand.c \
     Network/FeedForward.c \
-    Network/FeedForward_Fast.c \
-    Trainer/Trainer_FeedForward_Fast.c \
     Trainer/Trainer_FeedForward.c \
     Network/FeedForwardMomentum.c \
-    Trainer/Trainer_BPMomentum.c
+    Trainer/Trainer_BPMomentum.c \
+    Network/SOFM.c \
+    Trainer/Trainer_SOFM.c \
+    Test/BPFormantTest.c \
+    Test/SOFMTest.c \
+    Test/AFormant.c
 
 HEADERS += \
     RUtil/RUtil.h \
@@ -35,12 +36,8 @@ HEADERS += \
     RUtil/Structure/String.h \
     RUtil/Structure/Array.h \
     Activator.h \
-    Neuron/Neuron.h \
-    Network/Perceptron.h \
-    Trainer/Trainer_Perceptron.h \
     Rand.h \
     Trainer/Trainer_FeedForward3L.h \
-    Test/Formant.h \
     CVEDSP/Interpolation.h \
     CVEDSP/FrameProcessor.h \
     CVEDSP/Plot.h \
@@ -75,11 +72,14 @@ HEADERS += \
     CVEDSP/DSPBase/Filter.h \
     CVEDSP/DSPBase/ControlPointFilter.h \
     Trainer/Trainer_FeedForward.h \
-    Trainer/Trainer_FeedForward_Fast.h \
     Network/FeedForward.h \
-    Network/FeedForward_Fast.h \
     Network/FeedForwardMomentum.h \
-    Trainer/Trainer_BPMomentum.h
+    Trainer/Trainer_BPMomentum.h \
+    Network/SOFM.h \
+    Trainer/Trainer_SOFM.h \
+    Test/BPFormantTest.h \
+    Test/SOFMTest.h \
+    Test/AFormant.h
 
 
 unix:!macx: LIBS += -L$$PWD/CVEDSP/ -lCVEDSP

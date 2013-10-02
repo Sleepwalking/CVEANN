@@ -1,15 +1,22 @@
 #include "FeedForward.h"
 #include "Rand.h"
+#include "Activator.h"
+#include "CVEDSP/IntrinUtil/FloatArray.h"
+#include <malloc.h>
 
 _Constructor_ (NeuronLayer)
 {
-    ArrayType_Init(Neuron, Dest -> NList);
+    ArrayType_Init(float*, Dest -> W);
+    ArrayType_Init(float, Dest -> O);
 }
 
 _Destructor_ (NeuronLayer)
 {
-    ArrayType_ObjDtor(Neuron, Dest -> NList);
-    ArrayType_Dtor(Neuron, Dest -> NList);
+    int i;
+    for(i = 0; i <= Dest -> W_Index; i ++)
+        free(Dest -> W[i]);
+    ArrayType_Dtor(float*, Dest -> W);
+    ArrayType_Dtor(float, Dest -> O);
 }
 
 _Constructor_ (FeedForward)
@@ -25,52 +32,59 @@ _Destructor_ (FeedForward)
 
 void FeedForward_SetLayer(FeedForward* Dest, int* LayerSize, int LayerNum)
 {
-    int i, j, k;
+    int i, j;
     ArrayType_ObjDtor(NeuronLayer, Dest -> Layers);
-    Dest -> Layers_Index = - 1;
+    ArrayType_Resize(NeuronLayer, Dest -> Layers, LayerNum);
+    Dest -> Layers_Index = LayerNum - 1;
+
     for(i = 0; i < LayerNum; i ++)
     {
-        ArrayType_PushNull(NeuronLayer, Dest -> Layers);
         NeuronLayer_Ctor(Dest -> Layers + i);
-
-        ArrayType_Resize(Neuron, Dest -> Layers[i].NList, LayerSize[i]);
-        Dest -> Layers[i].NList_Index = LayerSize[i] - 1;
-        for(j = 0; j < LayerSize[i]; j ++)
+        if(i == 0)
+            ArrayType_Resize(float, Dest -> Layers[i].O, LayerSize[i]);
+        else
         {
-            Neuron_Ctor(Dest -> Layers[i].NList + j);
-            if(i == 0)
-                Dest -> Layers[i].NList[j].Type = NType_Input;
-            else
-            {
-                if(i == LayerNum - 1)
-                    Dest -> Layers[i].NList[j].Type = NType_Output;
-                for(k = 0; k < LayerSize[i - 1]; k ++)
-                    Neuron_ConnectFrom(Dest -> Layers[i].NList + j, Dest -> Layers[i - 1].NList + k);
-            }
+            ArrayType_Resize(float*, Dest -> Layers[i].W, LayerSize[i]);
+            ArrayType_Resize(float, Dest -> Layers[i].O, LayerSize[i]);
+            Dest -> Layers[i].W_Index = LayerSize[i] - 1;
+            for(j = 0; j < LayerSize[i]; j ++)
+                Dest -> Layers[i].W[j] = (float*)malloc(sizeof(float) * LayerSize[i - 1] + 4);
         }
+        Dest -> Layers[i].O_Index = LayerSize[i] - 1;
     }
 }
 
 void FeedForward_UpdateState(FeedForward* Dest)
 {
     int i, j;
+    int TmpSize = - 999;
+    float* Tmp;
+
     for(i = 0; i <= Dest -> Layers_Index; i ++)
-        for(j = 0; j <= Dest -> Layers[i].NList_Index; j ++)
-            Neuron_UpdateState(Dest -> Layers[i].NList + j);
+        if(Dest -> Layers[i].O_Index > TmpSize)
+            TmpSize = Dest -> Layers[i].O_Index + 1;
+    Tmp = (float*)malloc(sizeof(float) * TmpSize);
+
+    for(i = 1; i <= Dest -> Layers_Index; i ++)
+        for(j = 0; j <= Dest -> Layers[i].W_Index; j ++)
+        {
+            Boost_FloatMulArr(Tmp, Dest -> Layers[i - 1].O, Dest -> Layers[i].W[j], Dest -> Layers[i - 1].O_Index + 1);
+            Dest -> Layers[i].O[j] = Activator_Sigmoid(Boost_FloatSum(Tmp, Dest -> Layers[i - 1].O_Index + 1));
+            //Dest -> Layers[i].O[j] = Boost_FloatSum(Tmp, Dest -> Layers[i - 1].O_Index + 1);
+        }
+    free(Tmp);
 }
 
 void FeedForward_RandomInit(FeedForward* Dest, float Range)
 {
     int i, j, k;
     for(i = 1; i <= Dest -> Layers_Index; i ++)
-        for(j = 0; j <= Dest -> Layers[i].NList_Index; j ++)
-            for(k = 0; k <= Dest -> Layers[i - 1].NList_Index; k ++)
-                Dest -> Layers[i].NList[j].Weight[k] = Random() * Range;
+        for(j = 0; j <= Dest -> Layers[i].W_Index; j ++)
+            for(k = 0; k <= Dest -> Layers[i - 1].O_Index; k ++)
+                Dest -> Layers[i].W[j][k] = Random() * Range;
 }
 
 void FeedForward_SetInput(FeedForward* Dest, float* Input)
 {
-    int i;
-    for(i = 0; i <= Dest -> Layers[0].NList_Index; i ++)
-        Dest -> Layers[0].NList[i].InputVal = Input[i];
+    Boost_FloatCopy(Dest -> Layers[0].O, Input, Dest -> Layers[0].O_Index + 1);
 }

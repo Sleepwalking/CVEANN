@@ -1,5 +1,4 @@
-#ifndef FORMANT_H
-#define FORMANT_H
+#include "AFormant.h"
 
 float Spectrum_a_C3 [] =
 {
@@ -166,4 +165,3 @@ float ri[] = {0, 0, 1, 0, 0, 0};
 float re[] = {0, 0, 0, 1, 0, 0};
 float re_[] = {0, 0, 0, 0, 1, 0};
 float ru[] = {0, 0, 0, 0, 0, 1};
-#endif

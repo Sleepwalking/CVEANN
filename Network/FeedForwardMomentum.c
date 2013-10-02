@@ -39,28 +39,6 @@ void FeedForwardMomentum_Construct(FeedForwardMomentum* Dest, FeedForward* Src)
         //The first layer is empty.
         if(i > 0)
         {
-            ArrayType_Resize(float*, Dest -> Layers[i].dW, Src -> Layers[i].NList_Index + 1);
-            Dest -> Layers[i].dW_Index = Src -> Layers[i].NList_Index;
-            Dest -> Layers[i].dWSize = Src -> Layers[i - 1].NList_Index;
-            for(j = 0; j <= Dest -> Layers[i].dW_Index; j ++)
-                Dest -> Layers[i].dW[j] = (float*)malloc(sizeof(float) * Src -> Layers[i - 1].NList_Index + 4);
-        }
-    }
-}
-
-void FeedForwardMomentum_Construct_Fast(FeedForwardMomentum* Dest, FeedForward_Fast* Src)
-{
-    int i, j;
-    ArrayType_ObjDtor(MomentumLayer, Dest -> Layers);
-    ArrayType_Resize(MomentumLayer, Dest -> Layers, Src -> Layers_Index + 1);
-    Dest -> Layers_Index = Src -> Layers_Index;
-
-    for(i = 0; i <= Src -> Layers_Index; i ++)
-    {
-        MomentumLayer_Ctor(Dest -> Layers + i);
-        //The first layer is empty.
-        if(i > 0)
-        {
             ArrayType_Resize(float*, Dest -> Layers[i].dW, Src -> Layers[i].W_Index + 1);
             Dest -> Layers[i].dW_Index = Src -> Layers[i].W_Index;
             Dest -> Layers[i].dWSize = Src -> Layers[i - 1].W_Index;

@@ -6,67 +6,79 @@
 
 float Trainer_FeedForward_BP(FeedForward* Dest, float* Input, float* ExpectedOutput, float Eit)
 {
-    int i, j, k, MaxSize;
+    int i, j, MaxSize;
     FeedForward_SetInput(Dest, Input);
     FeedForward_UpdateState(Dest);
 
     MaxSize = - 999;
     for(i = 0; i < Dest -> Layers_Index; i ++)
-        if(Dest -> Layers[i].NList_Index > MaxSize)
-            MaxSize = Dest -> Layers[i].NList_Index;
+        if(Dest -> Layers[i].O_Index > MaxSize)
+            MaxSize = Dest -> Layers[i].O_Index + 1;
 
-    float* DeltaW = (float*)malloc(sizeof(float) * MaxSize + 4);
-    float* DeltaF = (float*)malloc(sizeof(float) * MaxSize + 4);
-    float* DeltaF2 = (float*)malloc(sizeof(float) * MaxSize + 4);
+    float* DeltaW = (float*)malloc(sizeof(float) * MaxSize);
+    float* DeltaF = (float*)malloc(sizeof(float) * MaxSize);
+    float* DeltaF2 = (float*)malloc(sizeof(float) * MaxSize);
+    float* Tmp = (float*)malloc(sizeof(float) * MaxSize);
 
     for(i = Dest -> Layers_Index; i > 0; i --)
     {
         if(i == Dest -> Layers_Index)
         {
             //Toppest Layer
-            for(j = 0; j <= Dest -> Layers[i].NList_Index; j ++)
+
+            /* Over Optimized
+            int CircSize = Dest -> Layers[i].O_Index + 1;
+            Boost_FloatSubArr(DeltaF, Dest -> Layers[i].O, ExpectedOutput, CircSize);
+            Boost_FloatSub(Tmp, Dest -> Layers[i].O, 1, CircSize);
+            Boost_FloatMulArr(DeltaF, DeltaF, Tmp, CircSize);
+            Boost_FloatMulArr(DeltaF, DeltaF, Dest -> Layers[i].O, CircSize);
+            Boost_FloatMul(DeltaW, DeltaF, Eit, CircSize);
+            */
+
+            for(j = 0; j <= Dest -> Layers[i].O_Index; j ++)
             {
-                DeltaF[j] = (ExpectedOutput[j] - Dest -> Layers[i].NList[j].Output)
-                          * Dest -> Layers[i].NList[j].Output
-                          * (1.0f - Dest -> Layers[i].NList[j].Output);
+                DeltaF[j] = (ExpectedOutput[j] - Dest -> Layers[i].O[j])
+                          * Dest -> Layers[i].O[j]
+                          * (1.0f - Dest -> Layers[i].O[j]);
                 DeltaW[j] = Eit * DeltaF[j];
             }
         }else
         {
             //Hidden Layer
-            for(j = 0; j <= Dest -> Layers[i].NList_Index; j ++)
+
+            int CircSize = Dest -> Layers[i].O_Index + 1;
+            Boost_FloatSet(DeltaF, 0, CircSize);
+
+            for(j = 0; j <= Dest -> Layers[i + 1].O_Index; j ++)
             {
-                DeltaF[j] = 0;
-                for(k = 0; k <= Dest -> Layers[i + 1].NList_Index; k ++)
-                    DeltaF[j] += DeltaF2[k] * Dest -> Layers[i + 1].NList[k].Weight[j];
+                Boost_FloatMul(Tmp, Dest -> Layers[i + 1].W[j], DeltaF2[j], CircSize);
+                Boost_FloatAddArr(DeltaF, DeltaF, Tmp, CircSize);
+            }
+
+            /* Over Optimized
+            Boost_FloatSub(Tmp, Dest -> Layers[i].O, 1, CircSize);
+            Boost_FloatMulArr(DeltaW, Tmp, Dest -> Layers[i].O, CircSize);
+            Boost_FloatMulArr(DeltaW, DeltaW, DeltaF, CircSize);
+            Boost_FloatMul(DeltaW, DeltaW, - Eit, CircSize);
+            */
+
+            for(j = 0; j <= Dest -> Layers[i].O_Index; j ++)
+            {
                 DeltaW[j] = Eit * DeltaF[j]
-                          * Dest -> Layers[i].NList[j].Output
-                          * (1.0f - Dest -> Layers[i].NList[j].Output);
+                          * Dest -> Layers[i].O[j]
+                          * (1.0f - Dest -> Layers[i].O[j]);
             }
         }
-        for(j = 0; j <= Dest -> Layers[i].NList_Index; j ++)
+        for(j = 0; j <= Dest -> Layers[i].O_Index; j ++)
         {
-            /*
+            Boost_FloatMul(Tmp, Dest -> Layers[i - 1].O, DeltaW[j], Dest -> Layers[i - 1].O_Index + 1);
             if(__MomentumFactor != 0)
             {
                 Boost_FloatMul(__Momentum -> Layers[i].dW[j], __Momentum -> Layers[i].dW[j], __MomentumFactor,  __Momentum -> Layers[i].dWSize + 1);
-                Boost_FloatAddArr(DeltaW, DeltaW, __Momentum -> Layers[i].dW[j], __Momentum -> Layers[i].dWSize + 1);
-                Boost_FloatCopy(__Momentum -> Layers[i].dW[i],  DeltaW, __Momentum -> Layers[i].dWSize + 1);
-            }*/
-            if(__MomentumFactor == 0)
-            {
-                for(k = 0; k <= Dest -> Layers[i - 1].NList_Index; k ++)
-                    Dest -> Layers[i].NList[j].Weight[k] += DeltaW[j] * Dest -> Layers[i - 1].NList[k].Output;
-            }else
-            {
-                Boost_FloatMul(__Momentum -> Layers[i].dW[j], __Momentum -> Layers[i].dW[j], __MomentumFactor,  __Momentum -> Layers[i].dWSize + 1);
-                for(k = 0; k <= Dest -> Layers[i - 1].NList_Index; k ++)
-                {
-                    float wTmp = DeltaW[j] * Dest -> Layers[i - 1].NList[k].Output + __Momentum -> Layers[i].dW[j][k];
-                    __Momentum -> Layers[i].dW[j][k] = wTmp;
-                    Dest -> Layers[i].NList[j].Weight[k] += wTmp;
-                }
+                Boost_FloatAddArr(Tmp, Tmp, __Momentum -> Layers[i].dW[j], __Momentum -> Layers[i].dWSize + 1);
+                Boost_FloatCopy(__Momentum -> Layers[i].dW[j], Tmp, __Momentum -> Layers[i].dWSize + 1);
             }
+            Boost_FloatAddArr(Dest -> Layers[i].W[j], Dest -> Layers[i].W[j], Tmp, Dest -> Layers[i - 1].O_Index + 1);
         }
         float* tmp = DeltaF;
         DeltaF = DeltaF2;
@@ -74,11 +86,12 @@ float Trainer_FeedForward_BP(FeedForward* Dest, float* Input, float* ExpectedOut
     }
 
     float E = 0;
-    for(i = 0; i <= Dest -> Layers[Dest -> Layers_Index].NList_Index; i ++)
-        E += pow(Dest -> Layers[Dest -> Layers_Index].NList[i].Output - ExpectedOutput[i], 2);
+    for(i = 0; i <= Dest -> Layers[Dest -> Layers_Index].O_Index; i ++)
+        E += pow(Dest -> Layers[Dest -> Layers_Index].O[i] - ExpectedOutput[i], 2);
 
     free(DeltaF2);
     free(DeltaF);
     free(DeltaW);
+    free(Tmp);
     return E;
 }
