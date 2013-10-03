@@ -1,8 +1,16 @@
 #include "Trainer_FeedForward.h"
 #include "CVEDSP/IntrinUtil/FloatArray.h"
+#include "CVEDSP/IntrinUtil/Calculation.h"
 #include <malloc.h>
 #include <string.h>
 #include <math.h>
+
+int Trainer_FFMatchWinner(FeedForward* Dest)
+{
+    return FeedForward_MatchLayer(Dest -> Layers + 1,
+                                  Dest -> Layers[0].O,
+                                  Dest -> Layers[0].O_Index + 1);
+}
 
 float Trainer_FeedForward_BP(FeedForward* Dest, float* Input, float* ExpectedOutput, float Eit)
 {

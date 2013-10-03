@@ -21,4 +21,6 @@ extern void FeedForward_UpdateState(FeedForward* Dest);
 extern void FeedForward_RandomInit(FeedForward* Dest, float Range);
 extern void FeedForward_SetInput(FeedForward* Dest, float* Input);
 
+extern int FeedForward_MatchLayer(NeuronLayer* Src, float* Target, int Length);
+
 #endif

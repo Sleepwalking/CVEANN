@@ -88,3 +88,25 @@ void FeedForward_SetInput(FeedForward* Dest, float* Input)
 {
     Boost_FloatCopy(Dest -> Layers[0].O, Input, Dest -> Layers[0].O_Index + 1);
 }
+
+int FeedForward_MatchLayer(NeuronLayer* Src, float* Target, int Length)
+{
+    int i;
+    float Max = 999;
+    int Record = - 1;
+    float* Tmp = (float*)malloc(sizeof(float) * Length);
+    for(i = 0; i <= Src -> W_Index; i ++)
+    {
+        float Sum = 0;
+        Boost_FloatSubArr(Tmp, Target, Src -> W[i], Length);
+        Boost_FloatMulArr(Tmp, Tmp, Tmp, Length);
+        Sum = Boost_FloatSum(Tmp, Length);
+        if(Sum < Max)
+        {
+            Max = Sum;
+            Record = i;
+        }
+    }
+    free(Tmp);
+    return Record;
+}

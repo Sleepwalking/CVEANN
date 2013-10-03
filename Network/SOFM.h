@@ -14,7 +14,6 @@ typedef struct
 extern SOFMDescriptor SOFM_FromFeedForward(FeedForward* Base, int _Width, int _Height);
 
 extern int SOFM_GetWinnerIndex(SOFMDescriptor Src);
-extern int SOFM_UpdateState(SOFMDescriptor Dest);
 
 #define SOFM_Index(Src, X, Y)\
     ((X) + (Y) * (Src).Width)

@@ -23,7 +23,10 @@ SOURCES += main.c \
     Trainer/Trainer_SOFM.c \
     Test/BPFormantTest.c \
     Test/SOFMTest.c \
-    Test/AFormant.c
+    Test/AFormant.c \
+    Network/LVQ.c \
+    Trainer/Trainer_LVQ.c \
+    Test/LVQTest.c
 
 HEADERS += \
     RUtil/RUtil.h \
@@ -79,7 +82,10 @@ HEADERS += \
     Trainer/Trainer_SOFM.h \
     Test/BPFormantTest.h \
     Test/SOFMTest.h \
-    Test/AFormant.h
+    Test/AFormant.h \
+    Network/LVQ.h \
+    Trainer/Trainer_LVQ.h \
+    Test/LVQTest.h
 
 
 unix:!macx: LIBS += -L$$PWD/CVEDSP/ -lCVEDSP

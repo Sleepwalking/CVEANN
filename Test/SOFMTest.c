@@ -16,7 +16,7 @@ void Test_SOFMTest()
     FeedForward FNet;
     FeedForward_Ctor(& FNet);
     FeedForward_SetLayer(& FNet, Layers, 2);
-    FeedForward_RandomInit(& FNet, 1);
+    FeedForward_RandomInit(& FNet, 0);
 
     SOFMDescriptor SNet = SOFM_FromFeedForward(& FNet, 10, 10);
     /*
@@ -52,7 +52,7 @@ void Test_SOFMTest()
     }
 
     FeedForward_SetInput(& FNet, Spectrum_pu_E3);
-    i = SOFM_UpdateState(SNet);
+    i = SOFM_GetWinnerIndex(SNet);
     printf("x = %d, y = %d\n", SOFM_X(SNet, i), SOFM_Y(SNet, i));
 
     FeedForward_Dtor(& FNet);
